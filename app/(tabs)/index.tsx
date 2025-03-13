@@ -4,50 +4,18 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; 
-
-const people = [
-  { 
-    id: 1334049, 
-    name: 'Ethelbert Nunez', 
-    details: 'Hari ng Pasil', 
-    image: require('@/assets/images/profile_images/ethel.png') // ✅ Corrected path
-  },
-  { 
-    id: 1334029, 
-    name: 'Adrian Medalla', 
-    details: 'Pasil Administrator', 
-    image: require('@/assets/images/profile_images/medal.png')
-  },
-  { 
-    id: 1334059, 
-    name: 'Charlz Dereck Arranchado', 
-    details: 'Pasil Structural Engineer', 
-    image: require('@/assets/images/profile_images/charlz.png')
-  },
-  { 
-    id: 1334079, 
-    name: 'Lance Joseph Lines', 
-    details: 'Pasil Architect', 
-    image: require('@/assets/images/profile_images/lance.png')
-  },
-  { 
-    id: 1334025, 
-    name: 'Denzel Joseph Infante', 
-    details: 'Pasil Planner and Developer', 
-    image: require('@/assets/images/profile_images/denzel.png')
-  },
-];
+import { friendsData } from '@/constants/friendsData';
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredPeople, setFilteredPeople] = useState(people);
+  const [filteredPeople, setFilteredPeople] = useState(friendsData);
   const [showSearch, setShowSearch] = useState(false);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = people.filter(person =>
-      person.name.toLowerCase().includes(query.toLowerCase()) ||
-      person.details.toLowerCase().includes(query.toLowerCase())
+    const filtered = friendsData.filter(friendsData =>
+      friendsData.name.toLowerCase().includes(query.toLowerCase()) ||
+      friendsData.details.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredPeople(filtered);
   };
@@ -87,15 +55,15 @@ export default function HomeScreen() {
               pathname: "/profile/[id]",
               params: { 
                 id: item.id.toString(),
-                name: item.name,
-                details: item.details,
-                image: item.image, // Pass Image URL as parameter
+                // name: item.name,
+                // details: item.details,
+                // image: item.image, // Pass Image URL as parameter
               }
             }}
             asChild
           >
             <Pressable style={styles.card}>
-            <Image source={item.image} style={styles.avatar} />
+              <Image source={item.image} style={styles.avatar} />
 
               <View style={styles.cardContent}>
                 <Text style={styles.name}>{item.name}</Text>

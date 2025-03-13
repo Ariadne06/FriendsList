@@ -2,10 +2,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, Image, Pressable, StatusBar, Animated } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { friendsData } from '@/constants/friendsData';
 
 export default function ProfileScreen() {
-  const { id, name, details, image } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
+
+  // Find the correct friend based on ID
+  const friend = friendsData.find((person) => person.id === Number(id));
 
   // Animation for fade-in effect
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -18,6 +22,15 @@ export default function ProfileScreen() {
     }).start();
   }, []);
 
+  // If friend not found, return an error message
+  if (!friend) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>User not found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
@@ -27,18 +40,26 @@ export default function ProfileScreen() {
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </Pressable>
-        <Image source={typeof image === "string" ? JSON.parse(image) : image} style={styles.headerImage} />
+        <Image source={friend.image} style={styles.headerImage} />
       </View>
 
       {/* Profile Card with Animated Entrance */}
       <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
         {/* Profile Picture */}
-        <Image source={typeof image === "string" ? JSON.parse(image) : image} style={styles.avatar} />
+        <Image source={friend.image} style={styles.avatar} />
 
         {/* User Info */}
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.id}>User ID: {id}</Text>
-        <Text style={styles.details}>{details}</Text>
+        <Text style={styles.name}>{friend.name}</Text>
+        <Text style={styles.id}>User ID: {friend.id}</Text>
+        <Text style={styles.details}>{friend.details}</Text>
+      </Animated.View>
+
+      {/* Additional Details Card */}
+      <Animated.View style={[styles.additionalDetailsCard, { opacity: fadeAnim }]}>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Address:</Text> {friend.address}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Age:</Text> {friend.age}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Birthday:</Text> {friend.birthday}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Favorite Motto:</Text> "{friend.motto}"</Text>
       </Animated.View>
     </View>
   );
@@ -125,5 +146,30 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     paddingHorizontal: 20,
+  },
+  additionalDetailsCard: {
+    width: '85%',
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  detailText: {
+    fontSize: 16,
+    color: COLORS.textDark,
+    marginBottom: 5,
+  },
+  detailLabel: {
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    marginTop: 50,
   },
 });
