@@ -1,76 +1,51 @@
-import { useState } from 'react';
 import { 
-  Image, StyleSheet, Text, View, Pressable, FlatList, SafeAreaView, TextInput, StatusBar, Platform 
+  Image, StyleSheet, Text, View, Pressable, FlatList, SafeAreaView, StatusBar, Alert
 } from 'react-native';
-import { Link } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; 
-import { friendsData } from '@/constants/friendsData';
+import { Link, useRouter } from 'expo-router';
+import { friendsData } from '@/assets/data/friendsData';
 
 export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredPeople, setFilteredPeople] = useState(friendsData);
-  const [showSearch, setShowSearch] = useState(false);
+  const router = useRouter();
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    const filtered = friendsData.filter(friendsData =>
-      friendsData.name.toLowerCase().includes(query.toLowerCase()) ||
-      friendsData.details.toLowerCase().includes(query.toLowerCase())
+  const handlePress = (item: { id: number; name: string; details: string; image: string }) => {
+    Alert.alert(
+      item.name, // Alert title (full name of the friend)
+      `Proceed to ${item.name}'s profile page?`, // Alert body
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => router.push({ pathname: "/profile/[id]", params: { id: item.id.toString() } }),
+        },
+      ]
     );
-    setFilteredPeople(filtered);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      {/* Header */}
+      {/* Curved Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Friends List</Text>
-        <Pressable onPress={() => setShowSearch(!showSearch)} style={styles.searchIcon}>
-          <Ionicons name="search" size={24} color="#FFFFFF" />
-        </Pressable>
       </View>
-
-      {/* Search Bar */}
-      {showSearch && (
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search friends..."
-            placeholderTextColor="#A0A0A0"
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-        </View>
-      )}
 
       {/* List of Friends */}
       <FlatList
-        data={filteredPeople}
+        data={friendsData}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Link
-            href={{
-              pathname: "/profile/[id]",
-              params: { 
-                id: item.id.toString(),
-                // name: item.name,
-                // details: item.details,
-                // image: item.image, // Pass Image URL as parameter
-              }
-            }}
-            asChild
-          >
-            <Pressable style={styles.card}>
-              <Image source={item.image} style={styles.avatar} />
-
-              <View style={styles.cardContent}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.details}>{item.details}</Text>
-              </View>
-            </Pressable>
-          </Link>
+          <Pressable style={styles.card} onPress={() => handlePress(item)}>
+            <Image source={item.image} style={styles.avatar} />
+            
+            <View style={styles.cardContent}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.details}>{item.details}</Text>
+            </View>
+          </Pressable>
         )}
         contentContainerStyle={styles.listContainer}
       />
@@ -78,9 +53,10 @@ export default function HomeScreen() {
   );
 }
 
+// Define a modern color scheme
 const COLORS = {
-  primary: '#4A90E2',
   background: '#F2F2F7',
+  primary: '#0E5951', // Deep teal color (same as ProfileScreen)
   cardBackground: '#FFFFFF',
   textDark: '#1C1C1E',
   textLight: '#636366',
@@ -93,41 +69,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: Platform.OS === 'ios' ? 20 : 15,
-    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 30,
+    width: '100%',
+    height: 100,
     backgroundColor: COLORS.primary,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    position: 'absolute',
+    top: 0,
+    justifyContent: 'flex-end',
+    paddingLeft: 20,
+    paddingBottom: 20,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  searchIcon: {
-    padding: 8,
-  },
-  searchContainer: {
-    padding: 10,
-    backgroundColor: COLORS.cardBackground,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    marginTop: 10,
-  },
-  searchInput: {
-    height: 45,
-    backgroundColor: '#EFEFF4',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    color: COLORS.textDark,
-  },
   listContainer: {
-    paddingVertical: 10,
+    paddingTop: 100, // Adjusted for the curved header
   },
   card: {
     flexDirection: 'row',
@@ -144,9 +103,11 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: COLORS.primary,
     marginRight: 15,
   },
   cardContent: {
